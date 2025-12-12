@@ -1,94 +1,3 @@
-<style>
-    body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-        line-height: 1.8;
-        color: #333;
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 20px;
-    }
-    h1 {
-        color: #667eea;
-        border-bottom: 3px solid #667eea;
-        padding-bottom: 10px;
-    }
-    h2 {
-        color: #667eea;
-        margin-top: 40px;
-        border-bottom: 2px solid #667eea;
-        padding-bottom: 8px;
-    }
-    h3 {
-        color: #764ba2;
-        margin-top: 30px;
-    }
-    .feature-box {
-        background: #f8f9fa;
-        border-left: 4px solid #667eea;
-        padding: 20px;
-        margin: 20px 0;
-        border-radius: 4px;
-    }
-    .warning {
-        background: #fff3cd;
-        border-left: 4px solid #ffc107;
-        padding: 15px;
-        margin: 20px 0;
-        border-radius: 4px;
-    }
-    .info {
-        background: #d1ecf1;
-        border-left: 4px solid #17a2b8;
-        padding: 15px;
-        margin: 20px 0;
-        border-radius: 4px;
-    }
-    .success {
-        background: #d4edda;
-        border-left: 4px solid #28a745;
-        padding: 15px;
-        margin: 20px 0;
-        border-radius: 4px;
-    }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 20px 0;
-    }
-    th, td {
-        padding: 12px;
-        text-align: left;
-        border-bottom: 1px solid #ddd;
-    }
-    th {
-        background: #667eea;
-        color: white;
-        font-weight: bold;
-    }
-    tr:hover {
-        background: #f5f5f5;
-    }
-    code {
-        background: #f4f4f4;
-        padding: 2px 6px;
-        border-radius: 3px;
-        font-family: 'Courier New', monospace;
-    }
-    pre {
-        background: #2d2d2d;
-        color: #f8f8f2;
-        padding: 20px;
-        border-radius: 8px;
-        overflow-x: auto;
-        margin: 20px 0;
-    }
-    pre code {
-        background: transparent;
-        color: #f8f8f2;
-        padding: 0;
-    }
-</style>
-
 # 🚀 LLM 服务使用指南
 
 **高效、智能的语言模型服务管理框架**
@@ -307,6 +216,261 @@ with create_service({
     response = service.invoke("Write a Python function to calculate factorial")
     print(response)
 ```
+
+### 示例 5：为 LLM 绑定工具
+
+```python
+from langchain_core.tools import tool
+from src.llm import create_service
+
+# 定义工具
+@tool
+def add(a: int, b: int) -> int:
+    """Adds two numbers together."""
+    return a + b
+
+@tool
+def multiply(a: int, b: int) -> int:
+    """Multiplies two numbers together."""
+    return a * b
+
+# 创建工具列表
+tools = [add, multiply]
+
+# 创建服务并获取 LLM
+with create_service() as service:
+    llm = service.get_llm()
+    
+    # 绑定工具到 LLM
+    llm_with_tools = llm.bind_tools(tools)
+    
+    # 使用带工具的 LLM
+    response = llm_with_tools.invoke("What is 5 + 3?")
+    print(response)
+```
+
+content='' additional_kwargs={'refusal': None} response_metadata={'token_usage': {'completion_tokens': 18, 'prompt_tokens': 52, 'total_tokens': 70, 'completion_tokens_details': {'accepted_prediction_tokens': 0, 'audio_tokens': 0, 'reasoning_tokens': 0, 'rejected_prediction_tokens': 0}, 'prompt_tokens_details': {'audio_tokens': 0, 'cached_tokens': 0}}, 'model_provider': 'openai', 'model_name': 'gpt-4.1-mini-2025-04-14', 'system_fingerprint': 'fp_3dcd5944f5', 'id': 'chatcmpl-Clk5dCkIEipVEn8soyDm3E7JWTWHp', 'finish_reason': 'tool_calls', 'logprobs': None} id='lc_run--019b0fae-0071-7973-816e-f8f39db73e2b-0' tool_calls=[{'name': 'add', 'args': {'a': 10, 'b': 10}, 'id': 'call_qsaH3LV5SUMMEsZc63xMuewE', 'type': 'tool_call'}] usage_metadata={'input_tokens': 52, 'output_tokens': 18, 'total_tokens': 70, 'input_token_details': {'audio': 0, 'cache_read': 0}, 'output_token_details': {'audio': 0, 'reasoning': 0}}
+
+
+---
+
+## 🔧 工具绑定与 Agent 集成
+
+### 定义工具
+
+使用 `@tool` 装饰器定义工具函数：
+
+```python
+from langchain_core.tools import tool
+
+@tool
+def add(a: int, b: int) -> int:
+    """Adds two numbers together.
+    
+    Args:
+        a: First number
+        b: Second number
+    
+    Returns:
+        Sum of a and b
+    """
+    return a + b
+
+@tool
+def get_weather(city: str) -> str:
+    """Get the current weather for a city.
+    
+    Args:
+        city: Name of the city
+    
+    Returns:
+        Weather information
+    """
+    # 实现天气查询逻辑
+    return f"Weather in {city}: Sunny, 25°C"
+```
+
+### 绑定工具到 LLM
+
+从服务获取 LLM 对象后，使用 `bind_tools()` 方法绑定工具：
+
+```python
+from src.llm import create_service
+from langchain_core.tools import tool
+
+# 定义工具
+@tool
+def add(a: int, b: int) -> int:
+    """Adds two numbers."""
+    return a + b
+
+# 创建工具列表
+tools = [add]
+
+# 创建服务并绑定工具
+with create_service() as service:
+    # 获取 LLM 对象
+    llm = service.get_llm()
+    
+    # 绑定工具
+    llm_with_tools = llm.bind_tools(tools)
+    
+    # 现在可以使用带工具的 LLM
+    response = llm_with_tools.invoke("Calculate 10 + 20")
+```
+
+### 在 Agent 中使用工具
+
+在 LangGraph Agent 中集成带工具的 LLM：
+
+```python
+from dataclasses import dataclass
+from typing import Any, Dict
+
+from langchain_core.tools import tool
+from langgraph.graph import StateGraph
+from langgraph.runtime import Runtime
+from typing_extensions import TypedDict
+
+from src.llm import create_service
+
+# 定义工具
+@tool
+def add(a: int, b: int) -> int:
+    """Adds two numbers."""
+    return a + b
+
+@tool
+def multiply(a: int, b: int) -> int:
+    """Multiplies two numbers."""
+    return a * b
+
+# 创建工具列表和字典
+tools = [add, multiply]
+tools_by_name = {tool.name: tool for tool in tools}
+
+# 创建 LLM 服务
+llm_service = create_service()
+llm = llm_service.get_llm()
+
+# 绑定工具到 LLM
+llm_with_tools = llm.bind_tools(tools)
+
+# 定义 Agent State
+@dataclass
+class State:
+    """Agent state."""
+    messages: list = None
+    # 其他状态字段...
+
+# 定义 Agent 节点
+async def agent_node(state: State, runtime: Runtime) -> Dict[str, Any]:
+    """Agent node that uses LLM with tools."""
+    # 使用带工具的 LLM
+    response = llm_with_tools.invoke(state.messages[-1].content)
+    
+    # 处理工具调用
+    if hasattr(response, 'tool_calls') and response.tool_calls:
+        for tool_call in response.tool_calls:
+            tool_name = tool_call['name']
+            tool_args = tool_call['args']
+            
+            # 执行工具
+            if tool_name in tools_by_name:
+                tool_result = tools_by_name[tool_name].invoke(tool_args)
+                # 将工具结果添加到消息中
+                # ...
+    
+    return {"messages": [response]}
+
+# 构建图
+graph = (
+    StateGraph(State)
+    .add_node("agent", agent_node)
+    .add_edge("__start__", "agent")
+    .compile()
+)
+```
+
+### 完整示例：带工具的 Agent
+
+<div class="feature-box">
+
+**完整示例：**
+
+```python
+from langchain_core.tools import tool
+from langchain_core.messages import HumanMessage, AIMessage
+from src.llm import create_service
+
+# 1. 定义工具
+@tool
+def calculator(expression: str) -> str:
+    """Evaluates a mathematical expression.
+    
+    Args:
+        expression: Mathematical expression as string (e.g., "2 + 2")
+    
+    Returns:
+        Result of the expression
+    """
+    try:
+        result = eval(expression)  # 注意：生产环境应使用更安全的方法
+        return str(result)
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+# 2. 创建工具列表
+tools = [calculator]
+
+# 3. 创建服务并绑定工具
+with create_service() as service:
+    llm = service.get_llm()
+    llm_with_tools = llm.bind_tools(tools)
+    
+    # 4. 使用带工具的 LLM
+    messages = [HumanMessage(content="What is 15 * 8?")]
+    response = llm_with_tools.invoke(messages)
+    
+    # 5. 处理工具调用
+    if hasattr(response, 'tool_calls') and response.tool_calls:
+        for tool_call in response.tool_calls:
+            tool_name = tool_call['name']
+            tool_args = tool_call['args']
+            
+            # 执行工具
+            if tool_name == 'calculator':
+                result = calculator.invoke(tool_args)
+                print(f"Tool result: {result}")
+    
+    print(f"LLM response: {response.content}")
+```
+
+</div>
+
+### 工具绑定最佳实践
+
+<div class="info">
+
+**💡 提示：**
+
+1. **工具定义**：确保工具函数有清晰的文档字符串，LLM 会使用这些信息来决定何时调用工具
+2. **工具命名**：使用描述性的工具名称，帮助 LLM 理解工具的功能
+3. **参数类型**：明确定义参数类型，有助于 LLM 正确调用工具
+4. **错误处理**：在工具函数中添加适当的错误处理
+5. **资源管理**：使用 `with` 语句确保服务资源正确释放
+
+</div>
+
+<div class="warning">
+
+**⚠️ 注意事项：**
+
+- 绑定工具后，LLM 可能会返回工具调用请求，需要检查 `tool_calls` 属性
+- 工具执行结果应该反馈给 LLM，以便生成最终响应
+- 在生产环境中，避免使用 `eval()` 等不安全的函数执行用户输入
+
+</div>
 
 ---
 

@@ -55,7 +55,7 @@ class OpenAIFactory(LLMFactoryAbstract):
         temperature = merged_config.get("temperature", 0.7)
         max_tokens = merged_config.get("max_tokens")
         api_key = merged_config.get("api_key") or os.getenv("OPENAI_API_KEY")
-        base_url = merged_config.get("base_url")
+        base_url = merged_config.get("base_url") or os.getenv("OPENAI_BASE_URL")
 
         # Extract additional kwargs
         kwargs = {

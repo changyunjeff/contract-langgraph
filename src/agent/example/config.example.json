@@ -1,0 +1,6 @@
+{
+  "example_context": "this is an example context from config file",
+  "system_prompt": "你是一个{role}，你只能回答数学相关的问题，如果用户提问数学以外的问题，请拒绝回答。",
+  "role": "数学专家"
+}
+

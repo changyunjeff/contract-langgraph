@@ -1,8 +1,9 @@
-"""New LangGraph Agent.
+"""Agent module for LangGraph.
 
-This module defines a custom graph.
+This module provides agent management and creation functionality.
 """
 
-from agent.graph import graph
+from src.agent.agent_manager import get_agent_manager, AgentManager
+from src.agent import agent_names
 
-__all__ = ["graph"]
+__all__ = ["get_agent_manager", "agent_names", "AgentManager"]

@@ -13,6 +13,7 @@ dependencies = [
     "python-dotenv>=1.0.1",
     "langchain-openai>=0.2.0",
     "langchain-core>=0.3.0",
+    "pytest>=9.0.2",
 ]
 
 
@@ -56,6 +57,12 @@ lint.ignore = [
 "tests/*" = ["D", "UP"]
 [tool.ruff.lint.pydocstyle]
 convention = "google"
+
+[tool.pytest.ini_options]
+markers = [
+    "integration: marks tests as integration tests (deselect with '-m \"not integration\"')",
+    "langsmith: marks tests that require LangSmith integration",
+]
 
 [dependency-groups]
 dev = [
