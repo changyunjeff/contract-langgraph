@@ -12,6 +12,6 @@ manager = get_agent_manager()
 # Create compiled agent with context config from config file
 agent_example, _ = manager.create_compiled_agent_by_name(
     name=agent_names.EXAMPLE_AGENT,
-    config_path="src/agent/example/config.example.json",
+    config={},
     graph_name=agent_names.EXAMPLE_AGENT,
 )
